@@ -17,10 +17,8 @@ class ContactsViewHolder(private val binding: RecyclerviewItemContactsBinding) :
     ) {
         with(binding) {
             if (contact.imageContact.isNotBlank()) {
-                Glide.with(avatarImageView.context)
+                Glide.with(avatarImageView)
                     .load(contact.imageContact)
-                    .skipMemoryCache(true)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .circleCrop()
                     .placeholder(R.drawable.baseline_person_24)
                     .error(R.drawable.baseline_person_24)
