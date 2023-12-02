@@ -1,22 +1,32 @@
 package com.example.contacts
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.contacts.databinding.ActivityMainBinding
-import com.example.contacts.presentation.NavigationFragment
+import com.example.contacts.presentation.ContactsFragment
+import com.example.contacts.presentation.aboutContacts.AboutContactsFragment
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater).also { setContentView(it.root) }
-        if (savedInstanceState == null) {
+        setContentView(R.layout.activity_main)
+        if (this.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             supportFragmentManager
                 .beginTransaction()
-                .add(R.id.navigationFragmentContainer, NavigationFragment())
+                .add(R.id.contactsFragment, ContactsFragment())
+                .commit()
+        } else {
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.contactsFragment, ContactsFragment())
+                .commit()
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.aboutContactsFragment, AboutContactsFragment())
                 .commit()
         }
+
     }
 
 }

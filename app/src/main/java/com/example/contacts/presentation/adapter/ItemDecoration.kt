@@ -24,25 +24,27 @@ class ItemDecoration(private val divider: Int, context: Context) :
             left = divider
             right = divider
             bottom = divider
-
         }
     }
 
     override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDraw(c, parent, state)
-    }
-
-    override fun onDrawOver(c: Canvas, parent: RecyclerView) {
         val left = parent.paddingLeft
         val right = parent.width - parent.paddingRight
         val childCount = parent.childCount
-        for (i in 0 until childCount) {
+        for (i in 0 until childCount - 1) {
             val child: View = parent.getChildAt(i)
+            val nextChild: View = parent.getChildAt(i + 1)
             val params = child.layoutParams as RecyclerView.LayoutParams
-            val top: Int = child.bottom + params.bottomMargin
+            val nextParams = nextChild.layoutParams as RecyclerView.LayoutParams
+            val top =
+                child.bottom + params.bottomMargin +
+                        (nextChild.top - child.bottom - params.bottomMargin - nextParams.topMargin) / 2
             val bottom = top + mDivider.intrinsicHeight
             mDivider.setBounds(left, top, right, bottom)
             mDivider.draw(c)
         }
     }
+
+
 }
