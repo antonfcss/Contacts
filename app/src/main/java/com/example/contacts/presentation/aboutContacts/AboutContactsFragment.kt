@@ -6,11 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.contacts.databinding.AboutContactFragmentBinding
-import com.example.contacts.domain.Contact
+import com.example.contacts.presentation.ContactsViewModel
 
 class AboutContactsFragment : Fragment() {
     private lateinit var binding: AboutContactFragmentBinding
 
+    private val viewModel = ContactsViewModel.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,24 +24,23 @@ class AboutContactsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val contactModel = arguments?.getParcelable<Contact>("contactModel") as Contact
-        with(binding) {
-            firstNameEditText.setText(contactModel.firstName)
-            lastNameEditText.setText(contactModel.lastName)
-            phoneEditText.setText(contactModel.phoneContact)
-            saveButton.setOnClickListener {
-                val firstName = binding.firstNameEditText.text.toString()
-                val lastName = binding.lastNameEditText.text.toString()
-                val phoneContact = binding.phoneEditText.text.toString()
-                val result = Bundle().apply {
-                    putString("firstName", firstName)
-                    putString("lastName", lastName)
-                    putString("phoneContact", phoneContact)
+        viewModel.selectedContact.observe(viewLifecycleOwner) { selectedContact ->
+            if (selectedContact != null) {
+                with(binding) {
+                    firstNameEditText.setText(selectedContact.firstName)
+                    lastNameEditText.setText(selectedContact.lastName)
+                    phoneEditText.setText(selectedContact.phoneContact)
+                    saveButton.setOnClickListener {
+                        viewModel.changeContactData(
+                            selectedContact.copy(
+                                firstName = firstNameEditText.text.toString(),
+                                lastName = lastNameEditText.text.toString(),
+                                phoneContact = phoneEditText.text.toString()
+                            )
+                        )
+                        requireActivity().supportFragmentManager.popBackStack()
+                    }
                 }
-                firstNameEditText.setText(firstName)
-                lastNameEditText.setText(lastName)
-                phoneEditText.setText(phoneContact)
-                childFragmentManager.setFragmentResult("aboutContactsResult", result)
             }
         }
     }

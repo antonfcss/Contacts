@@ -1,12 +1,12 @@
 package com.example.contacts.presentation
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SearchView
 import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import com.example.contacts.R
 import com.example.contacts.databinding.ContactsFragmentBinding
@@ -19,21 +19,19 @@ class ContactsFragment : Fragment() {
 
     private lateinit var binding: ContactsFragmentBinding
 
+    private val viewModel = ContactsViewModel.getInstance()
+
     private val contactsAdapter: ContactsAdapter by lazy {
         ContactsAdapter(
             { contactModel ->
-                val aboutContactsFragment = AboutContactsFragment().apply {
-                    arguments = bundleOf("contactModel" to contactModel)
+                viewModel.setSelectedContact(contactModel)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    requireActivity().supportFragmentManager
+                        .beginTransaction()
+                        .addToBackStack("aboutContactsFragment")
+                        .add(R.id.contactsFragment, AboutContactsFragment())
+                        .commit()
                 }
-                requireActivity().supportFragmentManager
-                    .beginTransaction()
-                    .addToBackStack(null)
-                    .replace(
-                        R.id.navigationFragmentContainer,
-                        aboutContactsFragment,
-                        null
-                    )
-                    .commit()
             },
             { contactModel ->
                 showDeleteItem(contactModel)
@@ -45,80 +43,43 @@ class ContactsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = ContactsFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val initList = arguments?.getParcelableArrayList<Contact>(CONTACT_TAG) as List<Contact>
         binding.recyclerView.adapter = contactsAdapter
-        contactsAdapter.setNewItems(initList)
         binding.recyclerView.addItemDecoration(
-            ItemDecoration(60, requireContext())
+            ItemDecoration(100, requireContext())
         )
-        childFragmentManager.setFragmentResultListener(
-            "aboutContactsResult",
-            viewLifecycleOwner
-        ) { _, result ->
-            val contact = result.getParcelable<Contact>("aboutContactsResult")
-            val newList =
-                (arguments?.getParcelableArrayList<Contact>(CONTACT_TAG) as List<Contact>).map {
-                    if (contact?.id == it.id) {
-                        contact
-                    } else {
-                        it
-                    }
-                }
-            contactsAdapter.setNewItems(newList)
-        }
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(p0: String?): Boolean {
                 return false
             }
-
             override fun onQueryTextChange(p0: String?): Boolean {
-                filterList(p0)
+                viewModel.searchContacts(p0.orEmpty())
                 return true
             }
 
         })
+        viewModel.currentContacts.observe(viewLifecycleOwner) {
+            contactsAdapter.setNewItems(it)
+        }
+        viewModel.getContactsList()
     }
 
-    /**Нужно помощь Сани с поиском, работает, но если мы ищем имя, находим его а потом очищаем список,
-    то у нас показывается новый список с тем именем которое мы искали. Наверное это потому
-    что я не сохраняю нигде список изначальный */
-    private fun filterList(query: String?) {
-        val filteredList = if (query.isNullOrBlank()) {
-            arguments?.getParcelableArrayList<Contact>(CONTACT_TAG) as List<Contact>
-        } else {
-            (arguments?.getParcelableArrayList<Contact>(CONTACT_TAG) as List<Contact>).filter {
-                it.firstName.contains(query, ignoreCase = true) || it.lastName.contains(
-                    query,
-                    ignoreCase = true
-                )
-            }
-        }
-        contactsAdapter.setNewItems(filteredList)
-    }
 
     private fun showDeleteItem(contact: Contact) {
         AlertDialog.Builder(requireContext()).setTitle("Delete item")
             .setMessage("Do you want delete item?")
             .setPositiveButton("Yes") { _, _ ->
-
+                viewModel.deleteContact(contact)
             }
             .setNegativeButton("No") { dialog, _ ->
                 dialog.dismiss()
             }
             .show()
-    }
-
-    companion object {
-        private const val CONTACT_TAG = "Contact"
-        fun newInstance(contacts: List<Contact>) = ContactsFragment().apply {
-            arguments = bundleOf(CONTACT_TAG to contacts)
-        }
     }
 }
