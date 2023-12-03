@@ -13,12 +13,18 @@ class ContactsViewModel : ViewModel() {
     val currentContacts: LiveData<List<Contact>>
         get() = _currentContacts
 
+    private var _selectedContact: MutableLiveData<Contact> = MutableLiveData()
+    val selectedContact: LiveData<Contact>
+        get() = _selectedContact
+
     private var contactsData: MutableList<Contact> = mutableListOf()
 
     init {
         contactsData.addAll(ContactService().getContactsInitialList())
     }
-
+    fun setSelectedContact(contact: Contact) {
+        _selectedContact.postValue(contact)
+    }
     fun getContactsList() {
         _currentContacts.postValue(contactsData)
     }
@@ -44,6 +50,7 @@ class ContactsViewModel : ViewModel() {
             }
         }.toMutableList()
         _currentContacts.postValue(contactsData)
+        _selectedContact.postValue(contact)
     }
 
     companion object {

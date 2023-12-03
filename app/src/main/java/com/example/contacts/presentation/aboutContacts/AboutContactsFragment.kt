@@ -1,13 +1,11 @@
 package com.example.contacts.presentation.aboutContacts
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.contacts.databinding.AboutContactFragmentBinding
-import com.example.contacts.domain.Contact
 import com.example.contacts.presentation.ContactsViewModel
 
 class AboutContactsFragment : Fragment() {
@@ -26,24 +24,23 @@ class AboutContactsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val contactModel = if(this.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-             arguments?.getParcelable<Contact>("contactModel") as Contact
-        } else {
-            Contact(0,"","","","")
-        }
-        with(binding) {
-            firstNameEditText.setText(contactModel.firstName)
-            lastNameEditText.setText(contactModel.lastName)
-            phoneEditText.setText(contactModel.phoneContact)
-            saveButton.setOnClickListener {
-                viewModel.changeContactData(
-                    contactModel.copy(
-                        firstName = firstNameEditText.text.toString(),
-                        lastName = lastNameEditText.text.toString(),
-                        phoneContact = phoneEditText.text.toString()
-                    )
-                )
-                requireActivity().supportFragmentManager.popBackStack("contactList", 1)
+        viewModel.selectedContact.observe(viewLifecycleOwner) { selectedContact ->
+            if (selectedContact != null) {
+                with(binding) {
+                    firstNameEditText.setText(selectedContact.firstName)
+                    lastNameEditText.setText(selectedContact.lastName)
+                    phoneEditText.setText(selectedContact.phoneContact)
+                    saveButton.setOnClickListener {
+                        viewModel.changeContactData(
+                            selectedContact.copy(
+                                firstName = firstNameEditText.text.toString(),
+                                lastName = lastNameEditText.text.toString(),
+                                phoneContact = phoneEditText.text.toString()
+                            )
+                        )
+                        requireActivity().supportFragmentManager.popBackStack()
+                    }
+                }
             }
         }
     }

@@ -11,22 +11,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (this.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             supportFragmentManager
                 .beginTransaction()
                 .add(R.id.contactsFragment, ContactsFragment())
+                .commit()
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.aboutContactsFragment, AboutContactsFragment(), "aboutContactsFragment")
                 .commit()
         } else {
             supportFragmentManager
                 .beginTransaction()
-                .add(R.id.contactsFragment, ContactsFragment())
-                .commit()
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.aboutContactsFragment, AboutContactsFragment())
+                .replace(R.id.contactsFragment, ContactsFragment())
                 .commit()
         }
-
     }
-
-}
+    }

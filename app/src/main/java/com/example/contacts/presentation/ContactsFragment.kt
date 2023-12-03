@@ -1,12 +1,12 @@
 package com.example.contacts.presentation
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.example.contacts.R
 import com.example.contacts.databinding.ContactsFragmentBinding
@@ -24,13 +24,14 @@ class ContactsFragment : Fragment() {
     private val contactsAdapter: ContactsAdapter by lazy {
         ContactsAdapter(
             { contactModel ->
-                requireActivity().supportFragmentManager
-                    .beginTransaction()
-                    .addToBackStack("contactList")
-                    .add(R.id.contactsFragment, AboutContactsFragment().apply {
-                        arguments = bundleOf("contactModel" to contactModel)
-                    })
-                    .commit()
+                viewModel.setSelectedContact(contactModel)
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    requireActivity().supportFragmentManager
+                        .beginTransaction()
+                        .addToBackStack("aboutContactsFragment")
+                        .add(R.id.contactsFragment, AboutContactsFragment())
+                        .commit()
+                }
             },
             { contactModel ->
                 showDeleteItem(contactModel)
@@ -57,7 +58,6 @@ class ContactsFragment : Fragment() {
             override fun onQueryTextSubmit(p0: String?): Boolean {
                 return false
             }
-
             override fun onQueryTextChange(p0: String?): Boolean {
                 viewModel.searchContacts(p0.orEmpty())
                 return true
@@ -82,6 +82,4 @@ class ContactsFragment : Fragment() {
             }
             .show()
     }
-
-
 }

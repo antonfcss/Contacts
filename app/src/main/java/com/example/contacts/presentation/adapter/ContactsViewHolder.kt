@@ -1,8 +1,8 @@
 package com.example.contacts.presentation.adapter
 
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.contacts.R
 import com.example.contacts.databinding.RecyclerviewItemContactsBinding
 import com.example.contacts.domain.Contact
@@ -39,6 +39,14 @@ class ContactsViewHolder(private val binding: RecyclerviewItemContactsBinding) :
             root.setOnLongClickListener {
                 longClickListener.invoke(contact)
                 true
+            }
+            callImageView.setOnClickListener {
+                Toast.makeText(
+                    binding.root.context,
+                    "Where is my money, Libovskii?",
+                    Toast.LENGTH_SHORT
+                ).show()
+
             }
         }
     }
